@@ -45,12 +45,7 @@ static BOOL protocol_containsSelector(Protocol *protocol, SEL selector)
 
 - (void)setDelegate:(id<SLExpandableTableViewDelegate>)delegate {
     _myDelegate = delegate;
-    if (delegate) {
-        //Set delegate to self only if original delegate is not nil
-        [super setDelegate:self];
-    } else{
-        [super setDelegate:nil];
-    }
+    [super setDelegate:self];
 }
 
 - (id<UITableViewDataSource>)dataSource {
@@ -393,9 +388,21 @@ static BOOL protocol_containsSelector(Protocol *protocol, SEL selector)
                 [self downloadDataInSection:indexPath.section];
             } else {
                 if ([self.showingSectionsDictionary[key] boolValue]) {
-                    [self collapseSection:indexPath.section animated:YES];
+                    if ([self.myDataSource respondsToSelector:@selector(tableView:expandSectionAvailable:)]) {
+                        if ([self.myDataSource tableView:self expandSectionAvailable:indexPath.section]) {
+                            [self collapseSection:indexPath.section animated:YES];
+                        }
+                    }else{
+                        [self collapseSection:indexPath.section animated:YES];
+                    }
                 } else {
-                    [self expandSection:indexPath.section animated:YES];
+                    if ([self.myDataSource respondsToSelector:@selector(tableView:expandSectionAvailable:)]) {
+                        if ([self.myDataSource tableView:self expandSectionAvailable:indexPath.section]) {
+                            [self expandSection:indexPath.section animated:YES];
+                        }
+                    }else{
+                        [self expandSection:indexPath.section animated:YES];
+                    }
                 }
             }
         } else {
